@@ -27,6 +27,19 @@ import (
 var srcPaths []string
 
 func init() {
+	goExecutable := os.Getenv("COBRA_GO_EXECUTABLE")
+	if len(goExecutable) <= 0 {
+		goExecutable = "go"
+	}
+
+	// Initialize modulePath.
+	out, err := exec.Command(goExecutable, "env", "GOMOD").Output()
+	if err != nil {
+		er(err)
+	}
+
+	modulePath, _ := filepath.Split(strings.TrimSpace(string(out)))
+
 	// Initialize srcPaths.
 	envGoPath := os.Getenv("GOPATH")
 	goPaths := filepath.SplitList(envGoPath)
@@ -36,11 +49,6 @@ func init() {
 		// is a default value. If there is no GOPATH check for the default value.
 		// Note, checking the GOPATH first to avoid invoking the go toolchain if
 		// possible.
-
-		goExecutable := os.Getenv("COBRA_GO_EXECUTABLE")
-		if len(goExecutable) <= 0 {
-			goExecutable = "go"
-		}
 
 		out, err := exec.Command(goExecutable, "env", "GOPATH").Output()
 		if err != nil {
@@ -54,6 +62,9 @@ func init() {
 		}
 	}
 	srcPaths = make([]string, 0, len(goPaths))
+	if modulePath != "" {
+		srcPaths = append(srcPaths, modulePath)
+	}
 	for _, goPath := range goPaths {
 		srcPaths = append(srcPaths, filepath.Join(goPath, "src"))
 	}
