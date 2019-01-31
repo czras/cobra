@@ -26,6 +26,8 @@ import (
 
 var srcPaths []string
 
+var moduleName string
+
 func init() {
 	goExecutable := os.Getenv("COBRA_GO_EXECUTABLE")
 	if len(goExecutable) <= 0 {
@@ -39,6 +41,13 @@ func init() {
 	}
 
 	modulePath, _ := filepath.Split(strings.TrimSpace(string(out)))
+
+	out, err = exec.Command(goExecutable, "mod", "why").Output()
+	if err != nil {
+		er(err)
+	}
+
+	moduleName = strings.TrimSpace(strings.Split(strings.Split(string(out), "\n")[0], "#")[1])
 
 	// Initialize srcPaths.
 	envGoPath := os.Getenv("GOPATH")

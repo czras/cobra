@@ -94,6 +94,9 @@ func NewProjectFromPath(absPath string) *Project {
 	p := new(Project)
 	p.absPath = strings.TrimSuffix(absPath, findCmdDir(absPath))
 	p.name = filepath.ToSlash(trimSrcPath(p.absPath, p.SrcPath()))
+	if moduleName != "" {
+		p.name = filepath.Join(moduleName, p.name)
+	}
 	return p
 }
 
